@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { Avion } from '../../models/avion.model';
 import { AvionService } from '../../services/avion.service';
+import { Observable } from 'rxjs/Observable';
 
 /**
  * Generated class for the ReservaVueloPage page.
@@ -17,9 +18,10 @@ import { AvionService } from '../../services/avion.service';
 })
 export class ReservaVueloPage {
 
-  aviones: Avion[] = [];
+  aviones$: Observable<Avion[]>;
+  //aviones: Avion[] = [];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private AvionService: AvionService){
+  constructor(public navCtrl: NavController, public navParams: NavParams, private avionService: AvionService){
   }
 
   ionViewDidLoad() {
@@ -27,11 +29,30 @@ export class ReservaVueloPage {
   }
 
   getAllPlanes(){
-    this.aviones = this.AvionService.getAviones();
+    //this.aviones = this.AvionService.getAviones();
+    this.aviones$ = this.avionService
+    .getAviones()  //Retorna la DB
+    .snapshotChanges() //retorna los cambios en la DB (key and value)
+    .map(
+      /*
+      Estas líneas retornan un array de  objetos con el id del registro y su contenido
+      {
+        "key":"value",
+        contact.name,
+        contact.organization,
+        ...
+      }
+      */
+      changes => {
+        return changes.map(c=> ({
+          key: c.payload.key, ...c.payload.val()
+        }));
+      }); 
   } 
   
-  onAddVuelo(value: Avion){
-     this.AvionService.addVuelo(value);
+  onAddVuelo($event,avion){
+     //this.AvionService.addVuelo(value);
+     this.avionService.addVuelo(avion);
      }
     
 }

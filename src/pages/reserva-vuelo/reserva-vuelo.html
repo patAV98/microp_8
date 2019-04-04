@@ -41,7 +41,7 @@
     </ion-item>
 
     <ion-list id="lista-vuelos">
-      <ion-item no-lines *ngFor="let avion of aviones" style="padding:0px;">
+      <ion-item no-lines *ngFor="let avion of aviones$ | async" style="padding:0px;">
         <ion-item class="infovuelo">
           <p>
             <span style="float:left;"><strong>Destino: </strong>{{avion.destino}}</span>
@@ -52,7 +52,7 @@
             <span style="float:right;"><strong>Hora vuelta: </strong>{{avion.horavuelta}}</span>
           </p>
           <p><strong>Precio: </strong>{{avion.precio}}€</p>
-          <button ion-button block class="reservar" (click)="onAddVuelo(avion.value)">RESERVAR</button>
+          <button ion-button block class="reservar" (click)="onAddVuelo($event,avion)">RESERVAR</button>
         </ion-item>
       </ion-item>
     </ion-list>

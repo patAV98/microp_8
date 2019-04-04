@@ -6,6 +6,7 @@ import { FacturarVueloPage } from '../facturar-vuelo/facturar-vuelo';
 import { Tarjeta } from "../../models/tarjeta.model";
 import { TarjetaService } from '../../services/tarjeta.service';
 import { TarjetaEmbarquePage } from '../tarjeta-embarque/tarjeta-embarque';
+import { Observable } from 'rxjs/Observable';
 
 /**
  * Generated class for the ConsultaVueloPage page.
@@ -21,8 +22,10 @@ import { TarjetaEmbarquePage } from '../tarjeta-embarque/tarjeta-embarque';
 })
 export class ConsultaVueloPage {
 
-  vuelos: Avion[] = [];
+  //vuelos: Avion[] = [];
   tarjetas: Tarjeta[] = [];
+
+  vuelos$: Observable<Avion[]>;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private AvionService: AvionService,  private TarjetaService: TarjetaService) {
   }
@@ -32,11 +35,28 @@ export class ConsultaVueloPage {
   }
 
   ionViewWillEnter(){
-    this.vuelos = this.AvionService.getVuelos();
+    this.vuelos$ = this.AvionService
+    .getVuelos()  //Retorna la DB
+    .snapshotChanges() //retorna los cambios en la DB (key and value)
+    .map(
+      /*
+      Estas líneas retornan un array de  objetos con el id del registro y su contenido
+      {
+        "key":"value",
+        contact.name,
+        contact.organization,
+        ...
+      }
+      */
+      changes => {
+        return changes.map(c=> ({
+          key: c.payload.key, ...c.payload.val()
+        }));
+      }); 
   }
 
   onLoadFacturar(value: String){
-    if(value == "Facturar"){
+    if(value != "Facturar"){
       this.navCtrl.push(FacturarVueloPage);
     }
     else{
